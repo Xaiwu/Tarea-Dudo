@@ -24,3 +24,7 @@ class Cacho:
         msj = ""
         msj = "X " * (len(self.dados) - 1)
         return msj + "X"
+
+    def perder_dado(self):
+        if len(self.dados) > 0:
+            self.dados.pop()
