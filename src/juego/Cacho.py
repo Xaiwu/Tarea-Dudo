@@ -28,3 +28,7 @@ class Cacho:
     def perder_dado(self):
         if len(self.dados) > 0:
             self.dados.pop()
+
+    def ganar_dado(self):
+        if len(self.dados) < 5:
+            self.dados.append(Dado())
