@@ -13,3 +13,8 @@ def test_oculto_mostrar_cacho():
     assert cacho.mostrar() == "X X X X X"
     cacho.revelar()
     assert cacho.mostrar() == "1 2 3 4 5"
+
+def test_perder_dado():
+    cacho = Cacho()
+    cacho.perder_dado()
+    assert len(cacho.dados) == 4
