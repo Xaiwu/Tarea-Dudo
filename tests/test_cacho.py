@@ -18,3 +18,10 @@ def test_perder_dado():
     cacho = Cacho()
     cacho.perder_dado()
     assert len(cacho.dados) == 4
+
+def test_ganar_dado():
+    cacho = Cacho([1,2,3,4])
+    cacho.ganar_dado()
+    assert len(cacho.dados) == 5
+    cacho.ganar_dado()
+    assert len(cacho.dados) == 5
