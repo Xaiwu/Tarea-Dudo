@@ -11,3 +11,13 @@ def test_gestor_partida_jugadores(num_jugadores,id_jugador):
 
     gestor.jugadores[id_jugador].ganar_dado()
     assert len(gestor.jugadores[id_jugador].dados) == 5
+
+
+def test_gestor_partida_iniciador():
+    gestor = GestorPartida(3)
+   
+    valores = [3, 6, 2]
+    for jugador, valor in zip(gestor.jugadores, valores):
+        jugador.dados[0].valor = valor
+    
+    assert gestor.determinar_iniciador() == gestor.jugadores[1]
