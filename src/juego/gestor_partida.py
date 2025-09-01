@@ -12,5 +12,5 @@ class GestorPartida:
             candidatos = [jugador for jugador, valor in zip(self.jugadores, valores) if valor == max_valor]
             if len(candidatos) == 1:
                 return candidatos[0]
-            for i in candidatos:
-                self.jugadores[i].dados[0].lanzar()
+            for cacho in candidatos:
+                cacho.dados[0].lanzar()
