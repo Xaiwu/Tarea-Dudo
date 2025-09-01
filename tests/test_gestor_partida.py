@@ -21,3 +21,11 @@ def test_gestor_partida_iniciador():
         jugador.dados[0].valor = valor
     
     assert gestor.determinar_iniciador() == gestor.jugadores[1]
+
+def test_gestor_partida_iniciador_con_empate(mocker):
+    gestor = GestorPartida(5)
+    for jugador in gestor.jugadores:
+        jugador.dados[0].valor = 5 
+
+    mocker.patch("random.randint", side_effect=[6, 2, 1, 2, 4])
+    assert gestor.determinar_iniciador() == gestor.jugadores[0]
