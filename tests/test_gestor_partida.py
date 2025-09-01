@@ -29,3 +29,23 @@ def test_gestor_partida_iniciador_con_empate(mocker):
 
     mocker.patch("random.randint", side_effect=[6, 2, 1, 2, 4])
     assert gestor.determinar_iniciador() == gestor.jugadores[0]
+
+
+def test_gestor_partida_flujo_turnos(mocker):
+    mocker.patch("random.randint", side_effect=[1, 4, 2, 1, 4, 6, 1, 4, 2, 1, 4, 2, 1, 4, 2])
+    gestor = GestorPartida(3)
+
+    gestor.determinar_iniciador()
+    assert gestor.jugador_actual() == gestor.jugadores[1]
+
+    
+    gestor.siguiente_turno()
+    assert gestor.jugador_actual() == gestor.jugadores[2]
+
+    
+    gestor.siguiente_turno()
+    assert gestor.jugador_actual() == gestor.jugadores[0]
+
+    
+    gestor.siguiente_turno()
+    assert gestor.jugador_actual() == gestor.jugadores[1]
