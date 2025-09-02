@@ -40,30 +40,36 @@ def test_primera_apuesta_siempre_valida():
 def test_apuesta_valida_incremento_cantidad_pinta_menor():
     """Test que se puede incrementar cantidad aunque la pinta sea menor"""
     validador = ValidadorApuesta()
-    assert validador.es_apuesta_valida((2, 6), (3, 1)) == True
+    # Este test debe seguir reglas especiales: 2 sextos -> 2 ases (2/2+1=2)
+    assert validador.es_apuesta_valida((2, 6), (2, 1)) == True
 
 def test_apuesta_valida_incremento_pinta_maxima():
     """Test validación con pintas en los extremos del rango"""
     validador = ValidadorApuesta()
-    # De pinta 1 (As) a pinta 6 (Sexto) con misma cantidad
-    assert validador.es_apuesta_valida((2, 1), (2, 6)) == True
+    # De pinta 2 (Tonto) a pinta 6 (Sexto) con misma cantidad
+    assert validador.es_apuesta_valida((2, 2), (2, 6)) == True
     # De pinta 5 a pinta 6 con misma cantidad
     assert validador.es_apuesta_valida((2, 5), (2, 6)) == True
 
 def test_apuesta_invalida_pinta_maxima_a_minima():
-    """Test que no se puede bajar de pinta máxima a mínima con misma cantidad"""
+    """Test que no se puede bajar de pinta máxima a mínima con misma cantidad (excepto reglas especiales de Ases)"""
     validador = ValidadorApuesta()
-    assert validador.es_apuesta_valida((2, 6), (2, 1)) == False
+    # De sextos a ases SÍ es válido por reglas especiales: 2 sextos -> 2 ases
+    assert validador.es_apuesta_valida((2, 6), (2, 1)) == True
+    # Pero de sextos a otras pintas menores NO es válido
+    assert validador.es_apuesta_valida((2, 6), (2, 2)) == False
+    assert validador.es_apuesta_valida((2, 6), (2, 5)) == False
 
 def test_apuesta_valida_casos_borde():
     """Test casos borde con cantidades y pintas límite"""
     validador = ValidadorApuesta()
     # Cantidad mínima
-    assert validador.es_apuesta_valida((1, 1), (1, 2)) == True
-    assert validador.es_apuesta_valida((1, 1), (2, 1)) == True
+    assert validador.es_apuesta_valida((1, 2), (1, 3)) == True
+    assert validador.es_apuesta_valida((1, 2), (2, 2)) == True
     # Incrementos mínimos válidos
-    assert validador.es_apuesta_valida((1, 1), (1, 2)) == True
-    assert validador.es_apuesta_valida((1, 6), (2, 1)) == True
+    assert validador.es_apuesta_valida((1, 2), (1, 3)) == True
+    # De Sextos a Ases debe seguir regla especial: 1 sexto -> 1 as (1/2 redondeado arriba = 1)
+    assert validador.es_apuesta_valida((1, 6), (1, 1)) == True
 
 # Tests para reglas especiales de Ases (pinta 1)
 def test_cambio_a_ases_cantidad_par():
@@ -127,8 +133,7 @@ def test_cambio_de_ases_cantidad_mayor_valida():
 def test_ases_casos_borde():
     """Test casos borde con las reglas especiales de Ases"""
     validador = ValidadorApuesta()
-    # Cantidad mínima: 1 as
-    # 2 trenes -> 1 as (2/2 = 1, par entonces +1 = 2, pero mínimo es 1)
-    assert validador.es_apuesta_valida((2, 3), (1, 1)) == True
+    # 2 trenes -> 2 ases (2/2 = 1, par entonces +1 = 2)
+    assert validador.es_apuesta_valida((2, 3), (2, 1)) == True
     # 1 as -> 3 trenes (1*2+1 = 3)
     assert validador.es_apuesta_valida((1, 1), (3, 3)) == True
