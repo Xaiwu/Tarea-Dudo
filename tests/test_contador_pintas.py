@@ -178,3 +178,72 @@ class TestContadorPintas:
         resultado = contador.contar_pinta(todos_los_dados, 3, ases_comodines=True)  # Contar Trenes con comodines
         
         assert resultado == 5  # 3 Trenes reales + 2 Ases comodines
+
+    # Tests para modo especial (ronda de un dado) - Ases NO son comodines
+    def test_contar_pintas_modo_especial_ases_no_comodines(self):
+        """Test conteo en modo especial donde los Ases NO actúan como comodines"""
+        contador = ContadorPintas()
+        dados = [
+            Mock(valor=1),  # As (NO comodín en modo especial)
+            Mock(valor=1),  # As (NO comodín en modo especial)
+            Mock(valor=3),  # Tren
+            Mock(valor=4),  # Cuadra
+            Mock(valor=5),  # Quina
+        ]
+        
+        resultado = contador.contar_pinta(dados, 3, modo_especial=True)  # Contar Trenes en modo especial
+        
+        assert resultado == 1  # Solo 1 Tren real, Ases NO cuentan como comodines
+
+    def test_contar_ases_en_modo_especial(self):
+        """Test contar Ases en modo especial (funcionan como pinta normal)"""
+        contador = ContadorPintas()
+        dados = [
+            Mock(valor=1),  # As
+            Mock(valor=1),  # As
+            Mock(valor=3),  # Tren
+            Mock(valor=4),  # Cuadra
+            Mock(valor=5),  # Quina
+        ]
+        
+        resultado = contador.contar_pinta(dados, 1, modo_especial=True)  # Contar Ases en modo especial
+        
+        assert resultado == 2  # Solo los Ases reales
+
+    def test_comparacion_modo_normal_vs_especial_con_ases(self):
+        """Test que compara explícitamente la diferencia entre modo normal y especial con Ases"""
+        contador = ContadorPintas()
+        dados = [
+            Mock(valor=1),  # As
+            Mock(valor=1),  # As
+            Mock(valor=4),  # Cuadra
+            Mock(valor=4),  # Cuadra
+            Mock(valor=5),  # Quina
+        ]
+        
+        # Modo normal con comodines: Ases actúan como comodines
+        resultado_normal_comodines = contador.contar_pinta(dados, 4, ases_comodines=True)
+        
+        # Modo especial: Ases NO actúan como comodines (independiente del flag ases_comodines)
+        resultado_especial = contador.contar_pinta(dados, 4, modo_especial=True)
+        resultado_especial_con_flag = contador.contar_pinta(dados, 4, modo_especial=True, ases_comodines=True)
+        
+        assert resultado_normal_comodines == 4  # 2 Cuadras + 2 Ases comodines
+        assert resultado_especial == 2  # Solo 2 Cuadras reales
+        assert resultado_especial_con_flag == 2  # Modo especial anula el flag de comodines
+
+    def test_multiples_jugadores_modo_especial(self):
+        """Test simulando conteo de múltiples jugadores en modo especial (ronda de un dado)"""
+        contador = ContadorPintas()
+        
+        # En ronda especial, típicamente un jugador tiene 1 dado y otros pueden tener más
+        dados_jugador_especial = [Mock(valor=1)]  # Jugador con 1 dado (As)
+        dados_jugador2 = [Mock(valor=3), Mock(valor=4)]  # Tren, Cuadra
+        dados_jugador3 = [Mock(valor=1), Mock(valor=3), Mock(valor=5)]  # As, Tren, Quina
+        
+        # Combinar todos los dados
+        todos_los_dados = dados_jugador_especial + dados_jugador2 + dados_jugador3
+        
+        resultado = contador.contar_pinta(todos_los_dados, 3, modo_especial=True)  # Contar Trenes en modo especial
+        
+        assert resultado == 2  # Solo 2 Trenes reales, los 2 Ases NO cuentan como comodines
