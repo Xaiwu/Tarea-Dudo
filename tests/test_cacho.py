@@ -25,3 +25,8 @@ def test_ganar_dado():
     assert len(cacho.dados) == 5
     cacho.ganar_dado()
     assert len(cacho.dados) == 5
+
+def test_no_ganar_mas_de_cinco_dados():
+    cacho = Cacho([1,2,3,4,5])
+    cacho.ganar_dado()
+    assert len(cacho.dados) == 5
