@@ -49,3 +49,11 @@ def test_gestor_partida_flujo_turnos(mocker):
     
     gestor.siguiente_turno()
     assert gestor.jugador_actual() == gestor.jugadores[1]
+
+def test_gestor_partida_jugador_un_dado():
+    gestor = GestorPartida(3)
+
+    while len(gestor.jugadores[1].dados) > 1:
+        gestor.jugadores[1].perder_dado()
+    jugadores_un_dado = gestor.jugadores_con_un_dado()
+    assert jugadores_un_dado == [gestor.jugadores[1]]
