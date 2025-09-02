@@ -116,3 +116,84 @@ class ArbitroRonda:
         # Puede calzar si hay mitad o más dados en juego
         # (dados del jugador representan al menos la mitad del total)
         return dados_jugador >= (total_dados / 2)
+    
+    def aplicar_resultado_duda(self, apuesta, dados, jugador_apostador, jugador_que_duda, modo_especial=False):
+        """
+        Aplica las consecuencias de una duda (hace perder un dado al jugador correspondiente).
+        
+        Returns:
+            dict: Resultado de la duda con las consecuencias aplicadas
+        """
+        resultado = self.determinar_resultado_duda(apuesta, dados, jugador_apostador, jugador_que_duda, modo_especial)
+        
+        # Aplicar la consecuencia
+        if 'jugador_perdedor' in resultado:
+            resultado['jugador_perdedor'].cacho.perder_dado()
+        
+        return resultado
+    
+    def aplicar_resultado_calzar(self, apuesta, dados, jugador_calzador, modo_especial=False):
+        """
+        Aplica las consecuencias de un calzar (hace ganar o perder un dado según el resultado).
+        
+        Returns:
+            dict: Resultado del calzar con las consecuencias aplicadas
+        """
+        resultado = self.determinar_resultado_calzar(apuesta, dados, jugador_calzador, modo_especial)
+        
+        # Aplicar la consecuencia
+        if 'jugador_ganador' in resultado:
+            resultado['jugador_ganador'].cacho.ganar_dado()
+        elif 'jugador_perdedor' in resultado:
+            resultado['jugador_perdedor'].cacho.perder_dado()
+        
+        return resultado
+    
+    def determinar_siguiente_jugador(self, resultado):
+        """
+        Determina quién debe iniciar la siguiente ronda según las reglas del juego.
+        
+        Regla: El jugador que pierde o gana un dado comienza la siguiente ronda.
+        
+        Returns:
+            Jugador: El jugador que debe iniciar la siguiente ronda
+        """
+        if 'jugador_perdedor' in resultado:
+            return resultado['jugador_perdedor']
+        elif 'jugador_ganador' in resultado:
+            return resultado['jugador_ganador']
+        else:
+            return None
+    
+    def procesar_duda_completa(self, apuesta, dados, jugador_apostador, jugador_que_duda, modo_especial=False):
+        """
+        Procesa una duda completa: determina el resultado, aplica las consecuencias 
+        y determina el siguiente jugador.
+        
+        Returns:
+            dict: Resultado completo con siguiente_jugador incluido
+        """
+        resultado = self.aplicar_resultado_duda(apuesta, dados, jugador_apostador, jugador_que_duda, modo_especial)
+        resultado['siguiente_jugador'] = self.determinar_siguiente_jugador(resultado)
+        return resultado
+    
+    def procesar_calzar_completo(self, apuesta, dados, jugador_calzador, modo_especial=False):
+        """
+        Procesa un calzar completo: determina el resultado, aplica las consecuencias 
+        y determina el siguiente jugador.
+        
+        Returns:
+            dict: Resultado completo con siguiente_jugador incluido
+        """
+        resultado = self.aplicar_resultado_calzar(apuesta, dados, jugador_calzador, modo_especial)
+        resultado['siguiente_jugador'] = self.determinar_siguiente_jugador(resultado)
+        return resultado
+    
+    def validar_jugador_puede_continuar(self, jugador):
+        """
+        Valida si un jugador puede continuar jugando (tiene al menos un dado).
+        
+        Returns:
+            bool: True si puede continuar, False si está eliminado
+        """
+        return len(jugador.cacho.dados) > 0
