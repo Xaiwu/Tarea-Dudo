@@ -265,3 +265,153 @@ class TestArbitroRonda:
         
         with pytest.raises(ValueError, match="Cantidad debe ser mayor a 0"):
             arbitro.determinar_resultado_calzar((-1, 3), [Mock()], Mock())
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_aplicar_resultado_duda_jugador_que_duda_pierde_dado(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 3
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_apostador = Mock()
+        jugador_que_duda = Mock()
+        jugador_que_duda.cacho.perder_dado = Mock()
+        dados = [Mock(valor=3)] * 5
+        
+        arbitro.aplicar_resultado_duda((3, 3), dados, jugador_apostador, jugador_que_duda)
+        
+        jugador_que_duda.cacho.perder_dado.assert_called_once()
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_aplicar_resultado_duda_jugador_apostador_pierde_dado(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 1
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_apostador = Mock()
+        jugador_apostador.cacho.perder_dado = Mock()
+        jugador_que_duda = Mock()
+        dados = [Mock(valor=5)] * 5
+        
+        arbitro.aplicar_resultado_duda((3, 5), dados, jugador_apostador, jugador_que_duda)
+        
+        jugador_apostador.cacho.perder_dado.assert_called_once()
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_aplicar_resultado_calzar_exacto_jugador_gana_dado(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 2
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.ganar_dado = Mock()
+        dados = [Mock(valor=4)] * 8
+        
+        arbitro.aplicar_resultado_calzar((2, 4), dados, jugador_calzador)
+        
+        jugador_calzador.cacho.ganar_dado.assert_called_once()
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_aplicar_resultado_calzar_inexacto_jugador_pierde_dado(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 1
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.perder_dado = Mock()
+        dados = [Mock(valor=6)] * 6
+        
+        arbitro.aplicar_resultado_calzar((3, 6), dados, jugador_calzador)
+        
+        jugador_calzador.cacho.perder_dado.assert_called_once()
+
+    def test_determinar_siguiente_jugador_perdedor_inicia(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_perdedor = Mock()
+        jugador_ganador = Mock()
+        
+        siguiente = arbitro.determinar_siguiente_jugador({'jugador_perdedor': jugador_perdedor})
+        
+        assert siguiente == jugador_perdedor
+
+    def test_determinar_siguiente_jugador_ganador_inicia(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_ganador = Mock()
+        
+        siguiente = arbitro.determinar_siguiente_jugador({'jugador_ganador': jugador_ganador})
+        
+        assert siguiente == jugador_ganador
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_procesar_duda_completa_con_aplicacion(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 2
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_apostador = Mock()
+        jugador_apostador.cacho.perder_dado = Mock()
+        jugador_que_duda = Mock()
+        dados = [Mock(valor=3)] * 5
+        
+        resultado = arbitro.procesar_duda_completa((3, 3), dados, jugador_apostador, jugador_que_duda)
+        
+        assert resultado['siguiente_jugador'] == jugador_apostador
+        jugador_apostador.cacho.perder_dado.assert_called_once()
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_procesar_calzar_completo_con_aplicacion(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 2
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.ganar_dado = Mock()
+        dados = [Mock(valor=5)] * 6
+        
+        resultado = arbitro.procesar_calzar_completo((2, 5), dados, jugador_calzador)
+        
+        assert resultado['siguiente_jugador'] == jugador_calzador
+        jugador_calzador.cacho.ganar_dado.assert_called_once()
+
+    def test_validar_jugador_puede_continuar_con_dados(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador = Mock()
+        jugador.cacho.dados = [Mock(), Mock()]
+        
+        resultado = arbitro.validar_jugador_puede_continuar(jugador)
+        
+        assert resultado is True
+
+    def test_validar_jugador_no_puede_continuar_sin_dados(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador = Mock()
+        jugador.cacho.dados = []
+        
+        resultado = arbitro.validar_jugador_puede_continuar(jugador)
+        
+        assert resultado is False
