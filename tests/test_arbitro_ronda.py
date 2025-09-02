@@ -415,3 +415,158 @@ class TestArbitroRonda:
         resultado = arbitro.validar_jugador_puede_continuar(jugador)
         
         assert resultado is False
+
+    def test_validar_condiciones_calzar_un_dado_permitido(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()]  # 1 dado
+        todos_los_dados = [Mock()] * 15  # 15 dados totales en mesa
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, jugador_calzador)
+        
+        assert resultado is True
+
+    def test_validar_condiciones_calzar_mitad_exacta_permitido(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        todos_los_dados = [Mock()] * 10  # 10 dados totales
+        # Jugador tiene 5 dados (mitad exacta)
+        dados_jugador = [Mock()] * 5
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, dados_jugador)
+        
+        assert resultado is True
+
+    def test_validar_condiciones_calzar_mas_de_mitad_permitido(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        todos_los_dados = [Mock()] * 8  # 8 dados totales
+        # Jugador tiene 5 dados (más de la mitad)
+        dados_jugador = [Mock()] * 5
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, dados_jugador)
+        
+        assert resultado is True
+
+    def test_validar_condiciones_calzar_menos_de_mitad_no_permitido(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        todos_los_dados = [Mock()] * 10  # 10 dados totales
+        # Jugador tiene 3 dados (menos de la mitad)
+        dados_jugador = [Mock()] * 3
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, dados_jugador)
+        
+        assert resultado is False
+
+    def test_validar_condiciones_calzar_dos_dados_pocos_no_permitido(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        todos_los_dados = [Mock()] * 12  # 12 dados totales
+        # Jugador tiene 2 dados (menos de la mitad y no es 1)
+        dados_jugador = [Mock()] * 2
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, dados_jugador)
+        
+        assert resultado is False
+
+    def test_validar_condiciones_calzar_caso_limite_mitad_impar(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        todos_los_dados = [Mock()] * 9  # 9 dados totales
+        # Jugador tiene 5 dados (más de 4.5, que es la mitad)
+        dados_jugador = [Mock()] * 5
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, dados_jugador)
+        
+        assert resultado is True
+
+    def test_validar_condiciones_calzar_caso_limite_mitad_impar_insuficiente(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        todos_los_dados = [Mock()] * 9  # 9 dados totales
+        # Jugador tiene 4 dados (menos de 4.5, que es la mitad)
+        dados_jugador = [Mock()] * 4
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, dados_jugador)
+        
+        assert resultado is False
+
+    def test_validar_condiciones_calzar_con_jugador_mock_object(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()] * 6
+        todos_los_dados = [Mock()] * 10  # 10 dados totales
+        
+        resultado = arbitro.validar_condiciones_calzar(todos_los_dados, jugador_calzador)
+        
+        assert resultado is True
+
+    def test_validar_condiciones_calzar_escenario_multijugador(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        # Escenario: 4 jugadores, cada uno con diferentes cantidades de dados
+        jugador1_dados = [Mock()] * 5  # Puede calzar (más de mitad de 8)
+        jugador2_dados = [Mock()] * 2  # No puede calzar (menos de mitad)
+        jugador3_dados = [Mock()] * 1  # Puede calzar (regla de 1 dado)
+        todos_los_dados = jugador1_dados + jugador2_dados + jugador3_dados
+        
+        resultado1 = arbitro.validar_condiciones_calzar(todos_los_dados, jugador1_dados)
+        resultado2 = arbitro.validar_condiciones_calzar(todos_los_dados, jugador2_dados)
+        resultado3 = arbitro.validar_condiciones_calzar(todos_los_dados, jugador3_dados)
+        
+        assert resultado1 is True   # 5 dados > mitad de 8
+        assert resultado2 is False  # 2 dados < mitad de 8
+        assert resultado3 is True   # 1 dado (regla especial)
+
+    def test_intentar_calzar_sin_condiciones_lanza_excepcion(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()] * 2  # Insuficientes dados
+        todos_los_dados = [Mock()] * 10
+        
+        with pytest.raises(ValueError, match="No se puede calzar: condiciones no cumplidas"):
+            arbitro.calzar_con_validacion((2, 3), todos_los_dados, jugador_calzador)
+
+    def test_calzar_con_validacion_exitoso_un_dado(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()]  # 1 dado
+        jugador_calzador.cacho.ganar_dado = Mock()
+        todos_los_dados = [Mock(valor=4)] * 8
+        
+        with patch.object(arbitro, 'contador_pintas') as mock_contador:
+            mock_contador.contar_pinta.return_value = 2
+            resultado = arbitro.calzar_con_validacion((2, 4), todos_los_dados, jugador_calzador)
+        
+        assert resultado['jugador_ganador'] == jugador_calzador
+
+    def test_calzar_con_validacion_exitoso_mitad_dados(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()] * 4  # 4 de 8 dados (mitad)
+        jugador_calzador.cacho.ganar_dado = Mock()
+        todos_los_dados = [Mock(valor=5)] * 8
+        
+        with patch.object(arbitro, 'contador_pintas') as mock_contador:
+            mock_contador.contar_pinta.return_value = 1
+            resultado = arbitro.calzar_con_validacion((1, 5), todos_los_dados, jugador_calzador)
+        
+        assert resultado['jugador_ganador'] == jugador_calzador
