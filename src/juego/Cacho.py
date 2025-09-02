@@ -21,9 +21,7 @@ class Cacho:
     def mostrar(self):
         if self.visibilidad:
             return " ".join(str(dado.valor) for dado in self.dados)
-        msj = ""
-        msj = "X " * (len(self.dados) - 1)
-        return msj + "X"
+        return " ".join(["X"] * len(self.dados))
 
     def perder_dado(self):
         if len(self.dados) > 0:
