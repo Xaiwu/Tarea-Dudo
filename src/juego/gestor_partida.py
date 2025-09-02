@@ -4,6 +4,7 @@ class GestorPartida:
     def __init__(self, num_jugadores):
         self.jugadores = [Cacho() for i in range(num_jugadores)]
         self.turno_actual = None
+        self.modo_especial = False
 
     def determinar_iniciador(self):
         while True:
@@ -24,3 +25,10 @@ class GestorPartida:
     
     def jugadores_con_un_dado(self):
             return [jugador for jugador in self.jugadores if len(jugador.dados) == 1]
+
+    def activar_reglas_especiales(self):
+        jugadores_un_dado = self.jugadores_con_un_dado()
+        if jugadores_un_dado:
+            self.modo_especial = True
+            for jugador in jugadores_un_dado:
+                jugador.modo_obligado = True   
