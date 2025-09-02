@@ -147,3 +147,121 @@ class TestArbitroRonda:
         assert 'apuesta_original' in resultado
         assert resultado['pintas_encontradas'] == 2
         assert resultado['apuesta_original'] == apuesta
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_calzar_exacto_jugador_gana_dado(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 3
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        dados = [Mock(valor=4)] * 10
+        
+        resultado = arbitro.determinar_resultado_calzar((3, 4), dados, jugador_calzador)
+        
+        assert resultado['jugador_ganador'] == jugador_calzador
+        assert resultado['razon'] == 'calzar_exacto'
+        assert resultado['pintas_encontradas'] == 3
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_calzar_inexacto_jugador_pierde_dado(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 2
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        dados = [Mock(valor=5)] * 8
+        
+        resultado = arbitro.determinar_resultado_calzar((3, 5), dados, jugador_calzador)
+        
+        assert resultado['jugador_perdedor'] == jugador_calzador
+        assert resultado['razon'] == 'calzar_inexacto'
+        assert resultado['pintas_encontradas'] == 2
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_calzar_ases_sin_comodines(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 1
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        dados = [Mock(valor=1)] * 6
+        
+        arbitro.determinar_resultado_calzar((1, 1), dados, Mock())
+        
+        mock_contador.contar_pinta.assert_called_once_with(dados, 1, ases_comodines=False)
+
+    @patch('src.juego.arbitro_ronda.ContadorPintas')
+    def test_calzar_modo_especial_ases_no_comodines(self, mock_contador_class):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        mock_contador = Mock()
+        mock_contador.contar_pinta.return_value = 1
+        mock_contador_class.return_value = mock_contador
+        
+        arbitro = ArbitroRonda()
+        dados = [Mock(valor=3), Mock(valor=1)]
+        
+        arbitro.determinar_resultado_calzar((1, 3), dados, Mock(), modo_especial=True)
+        
+        mock_contador.contar_pinta.assert_called_once_with(dados, 3, ases_comodines=True, modo_especial=True)
+
+    def test_calzar_permitido_con_un_dado(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()]
+        dados_totales = [Mock()] * 10
+        
+        resultado = arbitro.validar_puede_calzar(dados_totales, jugador_calzador)
+        
+        assert resultado is True
+
+    def test_calzar_permitido_con_mitad_dados(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()] * 2
+        dados_totales = [Mock()] * 4
+        
+        resultado = arbitro.validar_puede_calzar(dados_totales, jugador_calzador)
+        
+        assert resultado is True
+
+    def test_calzar_no_permitido_dados_insuficientes(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        jugador_calzador = Mock()
+        jugador_calzador.cacho.dados = [Mock()] * 2
+        dados_totales = [Mock()] * 8
+        
+        resultado = arbitro.validar_puede_calzar(dados_totales, jugador_calzador)
+        
+        assert resultado is False
+
+    def test_calzar_validacion_pinta_invalida(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        
+        with pytest.raises(ValueError, match="Pinta debe estar entre 1 y 6"):
+            arbitro.determinar_resultado_calzar((2, 0), [Mock()], Mock())
+
+    def test_calzar_validacion_cantidad_invalida(self):
+        from src.juego.arbitro_ronda import ArbitroRonda
+        
+        arbitro = ArbitroRonda()
+        
+        with pytest.raises(ValueError, match="Cantidad debe ser mayor a 0"):
+            arbitro.determinar_resultado_calzar((-1, 3), [Mock()], Mock())
