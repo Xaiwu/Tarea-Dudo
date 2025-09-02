@@ -21,3 +21,6 @@ class GestorPartida:
 
     def siguiente_turno(self):
         self.turno_actual = (self.turno_actual + 1) % len(self.jugadores)
+    
+    def jugadores_con_un_dado(self):
+            return [jugador for jugador in self.jugadores if len(jugador.dados) == 1]
