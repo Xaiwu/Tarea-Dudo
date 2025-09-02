@@ -12,3 +12,9 @@ def test_denominacion(valor, esperado):
     dado = Dado(valor)
     resultado = dado.get_denominacion()
     assert resultado == esperado
+
+def test_dado_valor_fuera_de_rango():
+    with pytest.raises(ValueError):
+        Dado(0)
+    with pytest.raises(ValueError):
+        Dado(7)
