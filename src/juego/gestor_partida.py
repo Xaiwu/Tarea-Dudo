@@ -1,21 +1,21 @@
-from src.juego.Cacho import Cacho
+from src.juego.Jugador import Jugador
 
 class GestorPartida:
     def __init__(self, num_jugadores):
-        self.jugadores = [Cacho() for i in range(num_jugadores)]
+        self.jugadores = [Jugador() for _ in range(num_jugadores)]
         self.turno_actual = None
         self.modo_especial = False
 
     def determinar_iniciador(self):
         while True:
-            valores = [jugador.get_valores()[0] for jugador in self.jugadores]
+            valores = [jugador.cacho.get_valores()[0] for jugador in self.jugadores]
             max_valor = max(valores)
             candidatos = [jugador for jugador, valor in zip(self.jugadores, valores) if valor == max_valor]
             if len(candidatos) == 1:
                 self.turno_actual = self.jugadores.index(candidatos[0])
                 return candidatos[0]
-            for cacho in candidatos:
-                cacho.dados[0].lanzar()
+            for jugador in candidatos:
+                jugador.cacho.dados[0].lanzar()
 
     def jugador_actual(self):
         return self.jugadores[self.turno_actual]
@@ -24,7 +24,7 @@ class GestorPartida:
         self.turno_actual = (self.turno_actual + 1) % len(self.jugadores)
     
     def jugadores_con_un_dado(self):
-            return [jugador for jugador in self.jugadores if len(jugador.dados) == 1]
+            return [jugador for jugador in self.jugadores if len(jugador.cacho.dados) == 1]
 
     def activar_reglas_especiales(self):
         jugadores_un_dado = self.jugadores_con_un_dado()
