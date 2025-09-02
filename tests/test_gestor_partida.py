@@ -57,3 +57,15 @@ def test_gestor_partida_jugador_un_dado():
         gestor.jugadores[1].perder_dado()
     jugadores_un_dado = gestor.jugadores_con_un_dado()
     assert jugadores_un_dado == [gestor.jugadores[1]]
+
+
+def test_gestor_partida_activa_reglas_especiales():
+    gestor = GestorPartida(3)
+    
+    while len(gestor.jugadores[1].dados) > 1:
+        gestor.jugadores[1].perder_dado()
+    
+    gestor.activar_reglas_especiales()
+    
+    assert gestor.modo_especial is True
+    assert gestor.jugadores[1].modo_obligado is True
