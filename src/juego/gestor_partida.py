@@ -5,6 +5,7 @@ class GestorPartida:
         self.jugadores = [Jugador() for _ in range(num_jugadores)]
         self.turno_actual = None
         self.modo_especial = False
+        self.apuesta_actual = None
 
     def determinar_iniciador(self):
         while True:
@@ -36,4 +37,12 @@ class GestorPartida:
     def finalizar_ronda_especial(self):
         self.modo_especial = False
         for jugador in self.jugadores:
-            jugador.modo_obligado = False  
+            jugador.modo_obligado = False
+    
+    def eliminar_jugadores_sin_dados(self, jugador_siguiente=None):
+        self.jugadores = [j for j in self.jugadores if len(j.cacho.dados) > 0]
+        if jugador_siguiente and jugador_siguiente in self.jugadores:
+            self.turno_actual = self.jugadores.index(jugador_siguiente)
+        else:
+            if self.turno_actual is None or self.turno_actual >= len(self.jugadores):
+                self.turno_actual = 0
