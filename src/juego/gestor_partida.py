@@ -32,3 +32,8 @@ class GestorPartida:
             self.modo_especial = True
             for jugador in jugadores_un_dado:
                 jugador.modo_obligado = True   
+    
+    def finalizar_ronda_especial(self):
+        self.modo_especial = False
+        for jugador in self.jugadores:
+            jugador.modo_obligado = False  
