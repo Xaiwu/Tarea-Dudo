@@ -90,3 +90,22 @@ def test_activar_y_finalizar_ronda_especial():
     assert gestor.modo_especial is False
     assert gestor.jugadores[0].modo_obligado is False
     assert gestor.jugadores[1].modo_obligado is False
+
+def test_eliminar_jugadores_sin_dados_al_finalizar_ronda():
+    gestor = GestorPartida(6)
+    gestor.determinar_iniciador()
+    
+    gestor.jugadores[3].cacho.dados = []
+
+    gestor.eliminar_jugadores_sin_dados()
+    
+    assert len(gestor.jugadores) == 5
+    assert gestor.turno_actual in [0, 5]
+
+    turno_inicial = gestor.turno_actual
+    gestor.siguiente_turno()
+    turno_final = gestor.turno_actual
+    assert turno_final != turno_inicial
+
+    gestor.eliminar_jugadores_sin_dados()
+    assert len(gestor.jugadores) == 5
