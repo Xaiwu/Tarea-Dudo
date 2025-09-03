@@ -25,7 +25,7 @@ def test_gestor_partida_iniciador():
 def test_gestor_partida_iniciador_con_empate(mocker):
     gestor = GestorPartida(5)
     for jugador in gestor.jugadores:
-        jugador.cacho.dados[0].valor = 5 
+        jugador.cacho.dados[0].valor = 5
 
     mocker.patch("random.randint", side_effect=[6, 2, 1, 2, 4])
     assert gestor.determinar_iniciador() == gestor.jugadores[0]
@@ -69,3 +69,24 @@ def test_gestor_partida_activa_reglas_especiales():
     
     assert gestor.modo_especial is True
     assert gestor.jugadores[1].modo_obligado is True
+
+
+def test_activar_y_finalizar_ronda_especial():
+    gestor = GestorPartida(2)
+    # Simula que el jugador 0 queda con un solo dado y activa modo obligado
+    while len(gestor.jugadores[0].cacho.dados) > 1:
+        gestor.jugadores[0].cacho.perder_dado()
+    gestor.jugadores[0].modo_obligado = True
+    gestor.modo_especial = True
+
+    # Verifica que el modo especial está activo
+    assert gestor.modo_especial is True
+    assert gestor.jugadores[0].modo_obligado is True
+
+    # Finaliza la ronda especial
+    gestor.finalizar_ronda_especial()
+
+    # Verifica que el modo especial y el modo obligado se desactivan
+    assert gestor.modo_especial is False
+    assert gestor.jugadores[0].modo_obligado is False
+    assert gestor.jugadores[1].modo_obligado is False
